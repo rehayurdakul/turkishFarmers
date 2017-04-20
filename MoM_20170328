@@ -1,0 +1,23 @@
+Ceyhun Gocenoglu/Turkey/IBM@IBMTR, "BURAK YILMAZ" <burakyilmaz13@ku.edu.tr>, "ORHUN CANCA" <ocanca14@ku.edu.tr>
+
+
+
+Selam Ceyhun
+organizasyon icin cok tesekkurler ederim.. 
+
+Burak/Orhun
+oncelikle sizlere yarismada basarilar dilerim ama bunun otesinde, bu calismaniz size gelecege yonelik guzel bir yatirim olacaktir inancindayim.. Hatirlamak kapsaminda,
+
+size, 
+1) isik/nem ve isi bilgilerini toplayip GSM ile bir MQTT Sunucuya yollayan kit hazirlayacagiz
+2) muhtemelen IBM'in MQTT sunucularindan birini kullaniriz (Ceyhun, lutfen BlueMix uyeligi saglandiginda haber et bize) 
+3) asagidaki ornek kodlari size saglayacagiz, 
+	a) MQTT client 
+	b) weather.com client
+	c) verileri koydugumuz MQTT server'in bilgileri (topic name, ip address, port name, data format) 
+
+Siz de, basit bir uygulama ile MQTT den bilgiyi alip, degerlendirip paylasacaksiniz
+
+liste tamam midir? gorusmek uzere, reha
+
+
