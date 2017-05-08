@@ -24,30 +24,16 @@
 //Version 2 - 23rd April 2017
 //  Sends sensor values via MQTT to realtime.ngi.ibm.com mqtt server.
 
-//Organization ID
-//14br69
-//Device Type
-//Gateways
-//Device ID
-//Node001
-//Authentication Method
-//token
-//Authentication Token
-//1lr3ZJn-GnXGFJI?(M
+//API Key a-kkak6f-iiojulkaby
+//Authentication Token  VWh_vDCcX5Xqju7_rw
 
-//Organization ID
-//14br69
-//Device Type
-//GW001
-//Device ID
-//GSMGW
-//Authentication Method
-//token
-//Authentication Token
-//X*jheygfPn5tQNfMTv
 
-//API Key   a-14br69-clshwgfyu8
-//Authentication Token    osKinz2x(T9Qh)S0&e
+//Organization ID kkak6f
+//Device Type rosera-a
+//Device ID GH001
+//Authentication Method token
+//Authentication Token  iQ6r2K5m*@XUrWU@nd
+
 
 
 
@@ -61,29 +47,30 @@ dht DHT;
 Adafruit_BMP085 bmp;
 ACS712 sensor(ACS712_20A, A0);
 
-#define DHT11_PIN 8
+#define DHT11_PIN 5
 #define LED13     13 
 #define GSM_IGN   6                // GSM Module pin 6
-#define DEVICE_IDNo "WN001"     // MFNode Device ID    
+#define DEVICE_IDNo "GH001"     // MFNode Device ID    
 
-#define reedPin 13
+#define reedPin 11
 
-char server[] = "169.45.2.20";
-char clientId[34] = "d:14br69:GW001:GSMGW";
-char topic[26] = "iot-2/evt/sensors/";
-char userID[] = "use-token-auth";
-char key[] = "X*jheygfPn5tQNfMTv";
+
+char server[] = "realtime.ngi.ibm.com";
+char clientId[34] = DEVICE_IDNo;
+char topic[26] = "Tr/Greenhse/data";
 
 int photoCellPin = 2;
 int photoCellReading;
 
 int defaultLightOn = 500;
 
+
 void setup() {
 
   Serial.begin(9600);
   digitalWrite(A1, INPUT_PULLUP);
   digitalWrite(A3, INPUT_PULLUP);
+  pinMode(reedPin, INPUT);
   delay(1000);
   checkBMP();
   checkDHT();
@@ -100,6 +87,7 @@ void loop() {
   checkDHT();
   //printTestValues();
   payloadConstructor();
+  //sendHelloMsg();
   delay(2000);
 }
 
@@ -120,8 +108,10 @@ void setUpBoard(){
 void sendHelloMsg()
 {
   char aBuff[18], dataToSend[60], fBuff[9];
-  strcpy(dataToSend, "Hallo from Farmers "); 
-  strcat(dataToSend, DEVICE_IDNo);
+  strcpy(dataToSend, DEVICE_IDNo);
+  strcat(dataToSend, " Initialized"); 
+  
+  
   sendMQTTMessage(clientId, server, topic, dataToSend);
 }
 
@@ -249,15 +239,8 @@ int measurePotLevel(){
 //########## Reed Relay Read #############
 
 int getRelayStatus(){
-  pinMode(13, INPUT);
-  delay(50);
-  if (digitalRead(reedPin) == HIGH){
-    pinMode(13, OUTPUT);
-    return 1;
-  } else {
-    pinMode(13, OUTPUT);
-    return 0;
-  }
+  
+  return (digitalRead(reedPin));
   
 }
 
@@ -289,13 +272,17 @@ void initHWPins() {
 
 void payloadConstructor(){
   
-  char strToSend[100];
+  char strToSend[150];
   char buffer[7];
   
   blinkLED(13,3,100);
 
-  strcpy(strToSend, DEVICE_IDNo);
+  //-1.285182, 36.816821
+
+  strcpy(strToSend, "greenhouse,");
+  strcat(strToSend, DEVICE_IDNo);
   strcat(strToSend, ",");
+  strcat(strToSend, "39.913826,32.814256,");
   itoa(measureLevelTemperature(),buffer,10); //(integer, yourBuffer, base)
   strcat(strToSend, buffer);
   strcat(strToSend, ",");
@@ -305,7 +292,7 @@ void payloadConstructor(){
   dtostrf(measureLevelPressure(), 6, 2, buffer);
   strcat(strToSend, buffer);
   strcat(strToSend, ",");
-  dtostrf(measureAltitude(), 5, 2, buffer);
+  dtostrf(measureAltitude(), 4, 2, buffer);
   strcat(strToSend, buffer);
   strcat(strToSend, ",");
   dtostrf(measureRealAlt(), 5, 2, buffer);
@@ -316,15 +303,15 @@ void payloadConstructor(){
   strcat(strToSend, ",");
   itoa(measureLevelLight(), buffer, 10);
   strcat(strToSend, buffer);
-  strcat(strToSend, ",");
-  dtostrf(measureCurrentDC(), 2, 2, buffer);
-  strcat(strToSend, buffer);
-  strcat(strToSend, ",");
-  itoa(measurePotLevel(), buffer, 10);
-  strcat(strToSend, buffer);
-  strcat(strToSend, ",");
-  itoa(getRelayStatus(), buffer, 10);
-  strcat(strToSend, buffer);
+//  strcat(strToSend, ",");
+//  dtostrf(measureCurrentDC(), 2, 2, buffer);
+//  strcat(strToSend, buffer);
+//  strcat(strToSend, ",");
+//  itoa(measurePotLevel(), buffer, 10);
+//  strcat(strToSend, buffer);
+//  strcat(strToSend, ",");
+//  itoa(getRelayStatus(), buffer, 10);
+//  strcat(strToSend, buffer);
 
   sendMQTTMessage(clientId, server, topic, strToSend);
   
@@ -336,7 +323,8 @@ void sendMQTTMessage(char* clientId, char* brokerUrl,  char* topic, char* messag
   int     mqttMessageLength = 0;
   
   blinkLED(13,999,defaultLightOn);
-  mqttMessageLength=mqtt_connect_message(mqttMessage, clientId, userID, key);   //prepare MQTTConnect Message String & calculate length
+  //mqttMessageLength=mqtt_connect_message(mqttMessage, clientId, "use-token-auth", "turkeyfarmnode");   //prepare MQTTConnect Message String & calculate length
+  mqttMessageLength=mqtt_connect_message(mqttMessage, clientId, "", "");
   gsm_send_tcp_MQTT_byte(brokerUrl,mqttMessage,mqttMessageLength);                                         // Send MQTT formatted connect string to IoT Server
   // Publish to MQTT Server
   mqtt_publish_message(mqttMessage, topic, message);                                                       // prepare MQTTPublish Message Message String
